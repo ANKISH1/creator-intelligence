@@ -1,5 +1,6 @@
 from youtube_transcript_api import YouTubeTranscriptApi
 from urllib.parse import urlparse, parse_qs
+from app.databases.storage import storage
 
 def extract_transcript(url:str):
     def fetch_video_id(string):
@@ -8,10 +9,13 @@ def extract_transcript(url:str):
         return query.get("v", [None])[0]              
 
     video_id = fetch_video_id(url)
-
-    transcript_api = YouTubeTranscriptApi()
-
-    transcript = transcript_api.fetch(video_id, languages=['en', 'hi'])
-
-    final_transcript = " ".join([s.text for s in transcript.snippets])
-    return final_transcript
+    existing_transcript = storage.get_transcript(video_id)
+    if existing_transcript:
+        return existing_transcript
+    
+    else:
+        transcript_api = YouTubeTranscriptApi()
+        transcript = transcript_api.fetch(video_id, languages=['en', 'hi'])
+        final_transcript = " ".join([s.text for s in transcript.snippets])
+        storage.save_transcript(video_id, final_transcript)
+        return final_transcript
