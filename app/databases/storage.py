@@ -5,23 +5,18 @@ from app.models.video_model import Video
 
 class Storage:
 
-    def save_transcript(self,video_id, transcript):
-        db = SessionLocal()
+    def save_transcript(self,db,video_id, transcript):
         existing_video = db.query(Video).filter(Video.video_id== video_id).first()
         if existing_video:
-            db.close()
             return "Transcript already exists"
 
         new_video = Video(video_id = video_id, transcript = transcript)
         db.add(new_video)
         db.commit()
-        db.close()
     
 
-    def get_transcript(self,video_id):
-        db = SessionLocal()
+    def get_transcript(self,db,video_id):
         video = db.query(Video).filter(Video.video_id == video_id).first()
-        db.close()
         if video:
             return video.transcript
         return None        
