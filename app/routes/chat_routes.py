@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from app.schemas.chat_request_schema import ChatRequest
 from app.databases.storage import storage
 from app.databases.db import getdb
@@ -12,9 +12,10 @@ def chat_with_video(chat: ChatRequest, db: Session = Depends(getdb)):
     transcript = storage.get_transcript(db,chat.video_id)
 
     if not transcript:
-        return {
-            "error":"Transcript not found"
-        }
+        raise HTTPException(
+            status_code= 404,
+            detail="Transcript not found"
+        )
     answer = get_answer(chat.question, transcript)
 
     return {
@@ -22,3 +23,4 @@ def chat_with_video(chat: ChatRequest, db: Session = Depends(getdb)):
         "question": chat.question,
         "answer": answer
     }
+    
