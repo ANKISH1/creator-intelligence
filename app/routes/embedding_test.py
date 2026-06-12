@@ -32,7 +32,33 @@ def get_similarity():
     text2 = "I like puppies"
     text3 = " I want to buy a car"
 
-    sim1 = embeddingservice.calculate_similarity(text1, text2)
-    sim2=  embeddingservice.calculate_similarity(text1, text3)
+    sim1 = embeddingservice.calculate_similarity_text(text1, text2)
+    sim2=  embeddingservice.calculate_similarity_text(text1, text3)
 
     return f"dog vs puppies ->{sim1} and dog vs car->{sim2}"
+
+
+@router.get("/retrieve")
+def get_chunk(db:Session = Depends(getdb)):
+    video_id = "g-jwWYX7Jlo"
+    question = "How to build descipline?"
+    question_embedding = embeddingservice.generate_embeddings(question)
+
+    chunks = storage.get_chunks(db, video_id=video_id)
+    best_chunk = None
+    best_similarity = -10
+    arr = []
+
+    for chunk in chunks:
+        chunk_embedding = embeddingservice.generate_embeddings(chunk.chunk_text)
+        similarity = embeddingservice.calculate_similarity_embeddings(chunk_embedding, question_embedding)
+        # if similarity.item()> best_similarity:
+        #     best_chunk = chunk
+        #     best_similarity = similarity.item()
+        arr.append({"chunk_number":chunk.chunk_number,
+                    "similarity": similarity.item()})
+
+    return arr
+        # "Similarity": best_similarity, 
+        # "chunk_number": best_chunk.chunk_number, 
+        # "chunk_text": best_chunk.chunk_text

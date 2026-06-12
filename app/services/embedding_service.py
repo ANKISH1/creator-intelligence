@@ -9,11 +9,14 @@ class EmbeddingService:
     def generate_embeddings(self, text):
         return self.model.encode(text).tolist()
     
-    def calculate_similarity(self,text1, text2):
+    def calculate_similarity_text(self,text1, text2):
         t1 = self.model.encode(text1)
         t2 = self.model.encode(text2)
 
         return self.model.similarity(t1, t2)
+    
+    def calculate_similarity_embeddings(self, embedding1, embedding2):
+        return self.model.similarity(embedding1, embedding2)
 
     
 
